@@ -72,3 +72,53 @@ var myMap = L.map("map", {
 // Creating the control that adds the layers to the map.
 
 L.control.layers(baseMaps, overlayMaps).addTo(myMap);
+
+// Getting JSON data with D3
+d3.json(earthquakesURL, function (earthquakeData) {
+  // Creating a function to handle marker size.
+  function markerSize(magnitude) {
+    if (magnitude === 0) {
+      return 1;
+    }
+    return magnitude * 3;
+  }
+
+  // Creating a function to colour the Markers.
+
+  function chooseColor(magnitude) {
+    switch (true) {
+      case magnitude > 5:
+        return "#581845";
+      case magnitude > 4:
+        return "#900C3F";
+      case magnitude > 3:
+        return "#C70039";
+      case magnitude > 2:
+        return "#FF5733";
+      case magnitude > 1:
+        return "#FFC300";
+      default:
+        return "#DAF7A6";
+    }
+  }
+
+
+
+
+
+
+
+  // Creating a function to style the markers.
+
+  function styleInfo(feature) {
+    return {
+      opacity: 1,
+      fillOpacity: 1,
+      fillColor: chooseColor(feature.properties.mag),
+      color: "#000000",
+      radius: markerSize(feature.properties.mag),
+      stroke: true,
+      weight: 0.5,
+    };
+  }
+
