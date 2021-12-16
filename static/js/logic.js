@@ -85,7 +85,7 @@ d3.json(earthquakesURL, function (earthquakeData) {
 
   // Creating a function to colour the Markers.
 
-  function chooseColor(magnitude) {
+  function Colorpick(magnitude) {
     switch (true) {
       case magnitude > 5:
         return "#581845";
@@ -102,19 +102,13 @@ d3.json(earthquakesURL, function (earthquakeData) {
     }
   }
 
-
-
-
-
-
-
   // Creating a function to style the markers.
 
   function styleInfo(feature) {
     return {
       opacity: 1,
       fillOpacity: 1,
-      fillColor: chooseColor(feature.properties.mag),
+      fillColor: Colorpick(feature.properties.mag),
       color: "#000000",
       radius: markerSize(feature.properties.mag),
       stroke: true,
@@ -122,3 +116,64 @@ d3.json(earthquakesURL, function (earthquakeData) {
     };
   }
 
+  // Getting tectonic data.
+  d3.json(tectonicURL, function (tecData) {
+    // Creating the JSON layer with the data.
+    L.geoJson(tecData, {
+      color: "#2014ff",
+      weight: 2,
+      // Adding to the layer.
+    }).addTo(tectonicPlates);
+    // Appending the layer to the map
+    tectonicPlates.addTo(myMap);
+  });
+
+  //  Creating the JSON layer with the features
+  L.geoJSON(earthquakeData, {
+    pointToLayer: function (feature, latlng) {
+      return L.circleMarker(latlng);
+    },
+    style: styleInfo,
+
+    // Function to create and bind popups.
+    onEachFeature: function (feature, layer) {
+      layer.bindPopup(
+        "<h4>Location: " +
+          feature.properties.place +
+          "</h4><hr><p>Date & Time: " +
+          new Date(feature.properties.time) +
+          "</p><hr><p>Magnitude: " +
+          feature.properties.mag +
+          "</p>"
+      );
+    },
+    // Add earthquakeData to earthquakes LayerGroups
+  }).addTo(earthquakes);
+  // Add earthquakes Layer to the Map
+  earthquakes.addTo(myMap);
+
+  // Creating a legend for the map
+
+  var legend = L.control({ position: "topright" });
+  legend.onAdd = function () {
+    var div = L.DomUtil.create("div", "info legend"),
+      magnitudeLevels = [0, 1, 2, 3, 4, 5];
+
+    div.innerHTML += "<h3>Magnitude</h3>";
+
+    for (var i = 0; i < magnitudeLevels.length; i++) {
+      div.innerHTML +=
+        '<i style="background: ' +
+        Colorpick(magnitudeLevels[i] + 1) +
+        '"></i> ' +
+        magnitudeLevels[i] +
+        (magnitudeLevels[i + 1]
+          ? "&ndash;" + magnitudeLevels[i + 1] + "<br>"
+          : "+");
+    }
+    return div;
+  };
+
+  // Appending the legend.
+  legend.addTo(myMap);
+});
